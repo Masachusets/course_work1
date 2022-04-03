@@ -22,7 +22,7 @@ class VkUser:
 
     def get_all_photos(self, owner_id=552934290,):
         """ Метод получает информацию о фотографиях пользователя из альбомов
-        profile и wall в наибольшем разрешении
+            profile и wall в наибольшем разрешении
         """
         res = []
         url = self.url + 'photos.get'

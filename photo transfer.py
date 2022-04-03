@@ -1,13 +1,6 @@
-import VKUser, YandexDisk, requests
+import VKUser
+import YandexDisk
 from pprint import pprint
-
-
-def sorted_photo(all_photos: list):
-    max_photos = {}
-    for photo in all_photos:
-        max_photos[f"{photo['likes']['count']}_{photo['likes']['user_likes']}"] = photo['sizes'][-1]['url']
-    pprint(max_photos)
-
 
 
 if __name__ == '__main__':
@@ -17,5 +10,8 @@ if __name__ == '__main__':
     with open('YaToken.txt', 'r') as file_object:
         YaToken = file_object.read().strip()
     uploader = YandexDisk.YaUploader(YaToken)
-    #pprint(vk_client.get_all_photos())
-    sorted_photo(vk_client.get_all_photos())
+
+    # pprint(vk_client.get_all_photos(vk_client.user_id()))
+    photos = vk_client.get_all_photos()
+    # pprint(photos)
+    uploader.import_photos_to_disk(photos)

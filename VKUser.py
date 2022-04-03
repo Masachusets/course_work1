@@ -1,7 +1,6 @@
 import time
 import requests
 import pandas as pd
-from pprint import pprint
 
 
 class VkUser:
@@ -13,26 +12,32 @@ class VkUser:
             'v': version
         }
 
-    def user(self, user_id=None, fields=None):
-        URL = self.url + 'users.get'
+    def user_id(self, user_id=None, fields=None):
+        """Метод получает id номер пользователя"""
+        url = self.url + 'users.get'
         user_params = {'user_ids': user_id,
                        'fields': fields}
-        res = requests.get(URL, params={**self.params, **user_params})
-        return res.json()
+        res = requests.get(url, params={**self.params, **user_params})
+        return res.json()['response'][0]['id']
 
     def get_all_photos(self, owner_id=552934290,):
-        res =[]
-        URL = self.url + 'photos.get'
+        """ Метод получает информацию о фотографиях пользователя из альбомов
+        profile и wall в наибольшем разрешении
+        """
+        res = []
+        url = self.url + 'photos.get'
         for album_id in ['profile', 'wall']:
-            user_params = {'owner_id': owner_id,
-                 'album_id': album_id,
-                 'extended': 1}
-            request = requests.get(URL, params={**self.params, **user_params})
+            user_params = {'owner_id': owner_id, 'album_id': album_id, 'extended': 1, 'photo_sizes': 1}
+            request = requests.get(url, params={**self.params, **user_params})
             res += request.json()['response']['items']
-        return res
+        max_photos = {}
+        for photo in res:
+            max_photos[f"{photo['likes']['count']}_{photo['date']}.gpg"] = photo['sizes'][-1]
+        return max_photos
 
     def search_groups(self, q, sorting=0):
-        '''
+        """
+        Ищет группы по запросу
         Параметры sort
         0 — сортировать по умолчанию (аналогично результатам поиска в полной версии сайта);
         1 — сортировать по скорости роста;
@@ -40,7 +45,7 @@ class VkUser:
         3 — сортировать по отношению количества лайков к количеству пользователей;
         4 — сортировать по отношению количества комментариев к количеству пользователей;
         5 — сортировать по отношению количества записей в обсуждениях к количеству пользователей.
-        '''
+        """
         group_search_url = self.url + 'groups.search'
         group_search_params = {
             'q': q,
@@ -51,6 +56,7 @@ class VkUser:
         return req['response']['items']
 
     def search_groups_ext(self, q, sorting=0):
+        """ поиск расширенной информации о группах по запросу """
         group_search_ext_url = self.url + 'groups.getById'
         target_groups = self.search_groups(q, sorting)
         target_group_ids = ','.join([str(group['id']) for group in target_groups])
@@ -62,6 +68,7 @@ class VkUser:
         return req['respone']
 
     def get_followers(self, user_id=None):
+        """ Ищет информацию о подписчиках """
         followers_url = self.url + 'users.getFollowers'
         followers_params = {
             'count': 1000,
@@ -71,6 +78,7 @@ class VkUser:
         return res['response']['items']
 
     def get_groups(self, user_id=None):
+        """ Группы в которых состоит пользователь """
         groups_url = self.url + 'groups.get'
         groups_params = {
             'count': 1000,
@@ -82,6 +90,7 @@ class VkUser:
         return res.json()
 
     def get_news(self, query):
+        """ Поиск новостей по запросу """
         groups_url = self.url + 'newsfeed.search'
         groups_params = {
             'q': query,
@@ -103,10 +112,9 @@ class VkUser:
 #     token = '958eb5d439726565e9333aa30e50e0f937ee432e927f0dbd541c541887d919a7c56f95c04217915c32008'
 #     vk_client = VkUser(token, '5.131')
 #     pprint(vk_client.user())
-#     pprint(vk_client.user()['response'][0]['id'])
+#     pprint(vk_client.user_id())
 #     pprint(vk_client.get_all_photos())
 #     url = 'https://api.vk.com/method/photos.getAlbums'
 #     params = {'access_token': token, 'v': '5.131', 'owner_id': 552934290}
 #     res = requests.get(url, params=params)
 #     pprint(res.json())
-'552934290'

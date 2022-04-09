@@ -32,7 +32,7 @@ class VkUser:
             res += request.json()['response']['items']
         max_photos = {}
         for photo in res:
-            max_photos[f"{photo['likes']['count']}_{photo['date']}.gpg"] = photo['sizes'][-1]
+            max_photos[f"{photo['likes']['count']}_{photo['date']}.jpg"] = photo['sizes'][-1]
         return max_photos
 
     def search_groups(self, q, sorting=0):
@@ -106,15 +106,3 @@ class VkUser:
             else:
                 break
         return newsfeed_df
-
-
-# if __name__ == '__main__':
-#     token = '958eb5d439726565e9333aa30e50e0f937ee432e927f0dbd541c541887d919a7c56f95c04217915c32008'
-#     vk_client = VkUser(token, '5.131')
-#     pprint(vk_client.user())
-#     pprint(vk_client.user_id())
-#     pprint(vk_client.get_all_photos())
-#     url = 'https://api.vk.com/method/photos.getAlbums'
-#     params = {'access_token': token, 'v': '5.131', 'owner_id': 552934290}
-#     res = requests.get(url, params=params)
-#     pprint(res.json())

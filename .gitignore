@@ -1,3 +1,7 @@
 VKtoken.txt
 YaToken.txt
 __pycache__/
+client_secrets.json
+credentials.json
+token.json
+GoogleDriveAPI.py

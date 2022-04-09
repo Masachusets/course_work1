@@ -60,11 +60,3 @@ class YaUploader:
             end_list.append({'file_name': f'/{dir}/{name}', 'size': photo['type']})
         with open('result.json', 'w') as outfile:
             json.dump(end_list, outfile)
-
-
-# if __name__ == '__main__':
-    # Получить путь к загружаемому файлу и токен от пользователя
-    # path_to_file =
-    # token =
-    # uploader = YaUploader(token)
-    # result = uploader.upload(path_to_file)

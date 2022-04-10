@@ -69,20 +69,14 @@ class GoogleObject:
         fh.seek(0)
 
     def import_photos_to_disk(self, photos):
-        """Shows basic usage of the Drive v3 API.
-        Prints the names and ids of the first 10 files the user has access to.
-        """
-        try:
-            service = build('drive', 'v3', credentials=self.creds)
-            direct = time.strftime('%y_%m_%d', time.gmtime(time.time()))
-            dir_metadata = {'name': direct,
-                            'mimeType': 'application/vnd.google-apps.folder'}
-            drive_folder_id = service.files().create(body=dir_metadata,
-                                                     fields='id').execute().get('id')
-            for file_name, photo in tqdm(photos.items()):
-                link = photo['url']
-                name = file_name
-                self.upload_file(link, name, drive_folder_id)
-        except HttpError as error:
-            print(f'An error occurred: {error}')
-        print('Upload complite!')
+        service = build('drive', 'v3', credentials=self.creds)
+        direct = time.strftime('%y_%m_%d', time.gmtime(time.time()))
+        dir_metadata = {'name': direct,
+                        'mimeType': 'application/vnd.google-apps.folder'}
+        drive_folder_id = service.files().create(body=dir_metadata,
+                                                 fields='id').execute().get('id')
+        for file_name, photo in tqdm(photos.items()):
+            link = photo['url']
+            name = file_name
+            self.upload_file(link, name, drive_folder_id)
+    print('Upload complite!')

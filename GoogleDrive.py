@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import io
 import os
 import requests
 import time
@@ -9,7 +10,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from apiclient.http import MediaFileUpload
+from apiclient.http import MediaIoBaseUpload
 from tqdm import tqdm
 
 # If modifying these scopes, delete the file token.json.
@@ -57,16 +58,15 @@ class GoogleObject:
         except HttpError as error:
             print(f'An error occurred: {error}')
 
-    def get_file(self, file_name, file_cont, direct=''):
-        file_content = requests.get(file_cont['url']).content
-        if direct:
-            with open(f'{direct}/{file_name}', 'wb') as image:
-                image.write(file_content)
-            return f'{direct}/{file_name}'
-        else:
-            with open(f'{file_name}', 'wb') as image:
-                image.write(file_content)
-            return f'{file_name}'
+    def upload_file(self, link, name, drive_folder_id, mimetype='image/jpg'):
+        service = build('drive', 'v3', credentials=self.creds)
+        file_content = requests.get(link).content
+        fh = io.BytesIO(file_content)
+        media = MediaIoBaseUpload(fh, mimetype=mimetype)
+        service.files().create(body={'name': name, 'parents': [drive_folder_id]},
+                               media_body=media,
+                               fields='id').execute()
+        fh.seek(0)
 
     def import_photos_to_disk(self, photos):
         """Shows basic usage of the Drive v3 API.
@@ -75,22 +75,14 @@ class GoogleObject:
         try:
             service = build('drive', 'v3', credentials=self.creds)
             direct = time.strftime('%y_%m_%d', time.gmtime(time.time()))
-            if os.path.exists(direct):
-                direct += '_one_more'
-            os.mkdir(direct)
             dir_metadata = {'name': direct,
                             'mimeType': 'application/vnd.google-apps.folder'}
             drive_folder_id = service.files().create(body=dir_metadata,
                                                      fields='id').execute().get('id')
             for file_name, photo in tqdm(photos.items()):
-                file_photo = self.get_file(file_name, photo, direct=direct)
-                media = MediaFileUpload(file_photo, mimetype='image/jpg')
-                service.files().create(body={'name': file_name, 'parents': [drive_folder_id]},
-                                       media_body=media,
-                                       fields='id').execute()
+                link = photo['url']
+                name = file_name
+                self.upload_file(link, name, drive_folder_id)
         except HttpError as error:
             print(f'An error occurred: {error}')
         print('Upload complite!')
-        # for file_name in photos:
-        #     os.remove(f'{direct}/{file_name}')
-        # os.rmdir(direct)
